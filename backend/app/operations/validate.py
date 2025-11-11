@@ -15,9 +15,11 @@ async def validate_op(_operation: SDKOperation, request: SDKOperationRequest) ->
     logging.error("Validation request: %s", request_data)
     formatted_request = official_format_to_aidbox(request_data)
     resource_to_validate = formatted_request["resource"]
-    resource_type = resource_to_validate["resourceType"] or "Patient"
+    resource_type = resource_to_validate.get("resourceType", "Patient")
     file_info = formatted_request["file_info"]
     session_id = formatted_request["session_id"]
+
+    logging.error("Resource to validate: %s", resource_to_validate)
 
     validation_results = await fhir_client.execute(
         f"{resource_type}/$validate", method="POST", data=resource_to_validate
@@ -38,8 +40,15 @@ def official_format_to_aidbox(data: dict) -> dict:
     if len(files_to_validate) == 1:
         resource_data = files_to_validate[0].get("fileContent", {})
         resource_data = json.loads(resource_data)
-        resource_data_meta = resource_data.get("meta", {})
-        resource_data["meta"] = {**resource_data_meta, "profile": profiles}
+        resource_data_meta = resource_data.get("meta")
+        if resource_data_meta is not None:
+            resource_data_meta_profile = resource_data_meta.get("profile", [])
+            if resource_data_meta_profile is not None:
+                resource_data["meta"]["profile"] = profiles
+            else:
+                resource_data["meta"] = {"profile": profiles}
+        else:
+            resource_data["meta"] = {"profile": profiles}
 
         return {
             "resource": resource_data,
