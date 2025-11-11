@@ -1,4 +1,5 @@
 import json
+import logging
 
 from aidbox_python_sdk.types import SDKOperation, SDKOperationRequest
 from aiohttp import web
@@ -10,7 +11,9 @@ from app.sdk import sdk
 @sdk.operation(["POST"], ["validate"], public=True)
 async def validate_op(_operation: SDKOperation, request: SDKOperationRequest) -> web.Response:
     fhir_client = request["app"][ak.fhir_client]
-    formatted_request = official_format_to_aidbox(request["resource"])
+    request_data = request["resource"]
+    logging.info(f"Validation request: {request_data}")
+    formatted_request = official_format_to_aidbox(request_data)
     resource_to_validate = formatted_request["resource"]
     resource_type = resource_to_validate["resourceType"]
     file_info = formatted_request["file_info"]
@@ -22,6 +25,8 @@ async def validate_op(_operation: SDKOperation, request: SDKOperationRequest) ->
     validation_results = aidbox_response_to_official_format(
         validation_results, file_info, session_id, resource_type
     )
+
+    logging.info(f"Validation results: {validation_results}")
 
     return web.json_response(validation_results)
 
