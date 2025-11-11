@@ -22,3 +22,22 @@
 ## IDE setup
 
 Strongly recommended to use ruff and mypy plugins for IDE
+
+## CI/CD
+
+The project uses GitHub Actions for continuous integration and deployment:
+
+- **Linting and Type Checking**: On every push and pull request, the workflow runs:
+  - `ruff check` for code linting
+  - `ruff format --check` for code formatting verification
+  - `mypy` for static type checking
+
+- **Docker Image Release**: On push to the `main` branch, after successful linting and type checking:
+  - Builds a Docker image from `backend/Dockerfile`
+  - Publishes the image to GitHub Packages (ghcr.io)
+  - Tags the image with:
+    - `latest` (for main branch)
+    - Branch name
+    - Git SHA
+
+The workflow is defined in `.github/workflows/backend-ci-cd.yml`
