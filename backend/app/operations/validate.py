@@ -16,8 +16,12 @@ async def validate_op(_operation: SDKOperation, request: SDKOperationRequest) ->
     file_info = formatted_request["file_info"]
     session_id = formatted_request["session_id"]
 
-    validation_results = await fhir_client.execute(f"{resource_type}/$validate", method="POST", data=resource_to_validate)
-    validation_results = aidbox_response_to_official_format(validation_results, file_info, session_id, resource_type)
+    validation_results = await fhir_client.execute(
+        f"{resource_type}/$validate", method="POST", data=resource_to_validate
+    )
+    validation_results = aidbox_response_to_official_format(
+        validation_results, file_info, session_id, resource_type
+    )
 
     return web.json_response(validation_results)
 
@@ -35,28 +39,23 @@ def official_format_to_aidbox(data: dict) -> dict:
         return {
             "resource": resource_data,
             "file_info": files_to_validate[0],
-            "session_id": session_id
+            "session_id": session_id,
         }
-    return {
-        "resource": {},
-        "file_info": files_to_validate[0],
-        "session_id": session_id
-    }
+    return {"resource": {}, "file_info": files_to_validate[0], "session_id": session_id}
 
-def aidbox_response_to_official_format(data: dict, file_info: dict, session_id: str, location: str) -> dict:
+
+def aidbox_response_to_official_format(
+    data: dict, file_info: dict, session_id: str, location: str
+) -> dict:
     issues = data.get("issue", [])
     issues = [format_issue(issue, location) for issue in issues]
 
     return {
-        "outcomes": [
-            {
-                "fileInfo": file_info,
-                "issues": issues
-            }
-        ],
+        "outcomes": [{"fileInfo": file_info, "issues": issues}],
         "sessionId": session_id,
-        "validationTimes": {}
+        "validationTimes": {},
     }
+
 
 def format_issue(aidbox_issue: dict, location: str) -> dict:
     expression = aidbox_issue.get("expression", [])[0]
@@ -79,5 +78,5 @@ def format_issue(aidbox_issue: dict, location: str) -> dict:
         "criticalSignpost": False,
         "matched": False,
         "ignorableError": False,
-        "count": 0
+        "count": 0,
     }
