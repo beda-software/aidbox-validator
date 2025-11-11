@@ -15,7 +15,7 @@ async def validate_op(_operation: SDKOperation, request: SDKOperationRequest) ->
     logging.error("Validation request: %s", request_data)
     formatted_request = official_format_to_aidbox(request_data)
     resource_to_validate = formatted_request["resource"]
-    resource_type = resource_to_validate["resourceType"]
+    resource_type = resource_to_validate["resourceType"] or "Patient"
     file_info = formatted_request["file_info"]
     session_id = formatted_request["session_id"]
 
@@ -46,6 +46,7 @@ def official_format_to_aidbox(data: dict) -> dict:
             "file_info": files_to_validate[0],
             "session_id": session_id,
         }
+
     return {"resource": {}, "file_info": files_to_validate[0], "session_id": session_id}
 
 
@@ -63,10 +64,11 @@ def aidbox_response_to_official_format(
 
 
 def format_issue(aidbox_issue: dict, location: str) -> dict:
-    expression = aidbox_issue.get("expression", [])[0]
+    logging.error("Aidbox issue: %s", aidbox_issue)
     code = aidbox_issue.get("details", {}).get("coding", [])[0].get("code", "")
     diagnostics = aidbox_issue.get("diagnostics", "")
-    message = f"{expression}: {diagnostics}"
+    expressions = aidbox_issue.get("expression", [])
+    message = f"{expressions[0]}: {diagnostics}" if len(expressions) > 0 else diagnostics
 
     return {
         "source": "InstanceValidator",
