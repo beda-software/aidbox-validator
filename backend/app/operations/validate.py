@@ -12,7 +12,7 @@ from app.sdk import sdk
 async def validate_op(_operation: SDKOperation, request: SDKOperationRequest) -> web.Response:
     fhir_client = request["app"][ak.fhir_client]
     request_data = request["resource"]
-    logging.info("Validation request: %s", request_data)
+    logging.error("Validation request: %s", request_data)
     formatted_request = official_format_to_aidbox(request_data)
     resource_to_validate = formatted_request["resource"]
     resource_type = resource_to_validate["resourceType"]
@@ -26,7 +26,7 @@ async def validate_op(_operation: SDKOperation, request: SDKOperationRequest) ->
         validation_results, file_info, session_id, resource_type
     )
 
-    logging.info("Validation results: %s", validation_results)
+    logging.error("Validation results: %s", validation_results)
 
     return web.json_response(validation_results)
 
