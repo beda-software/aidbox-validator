@@ -54,6 +54,14 @@ def aidbox_response_to_official_format(
     data: dict, file_info: dict, session_id: str, location: str
 ) -> dict:
     issues = data.get("issue", [])
+    if len(issues) == 1:
+        if issues[0].get("diagnostics") == "all ok":
+            return {
+                "outcomes": [{"fileInfo": file_info, "issues": []}],
+                "sessionId": session_id,
+                "validationTimes": {},
+            }
+
     issues = [format_issue(issue, location) for issue in issues]
 
     return {
