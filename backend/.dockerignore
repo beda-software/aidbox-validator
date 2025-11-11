@@ -1,0 +1,14 @@
+__pycache__
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.history
+.vscode
+
+.coverage
+
+htmlcov
+coverage.xml
+report.xml
+
+.DS_Store
