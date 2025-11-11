@@ -1,5 +1,6 @@
 import fhirpy_types_r4b as r4b
 from fhirpy import AsyncFHIRClient
+
 from tests.conftest import SafeDBFixture
 
 

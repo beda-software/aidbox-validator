@@ -1,4 +1,5 @@
 from aidbox_python_sdk.aidboxpy import AsyncAidboxClient
+
 from tests.conftest import SafeDBFixture
 
 
