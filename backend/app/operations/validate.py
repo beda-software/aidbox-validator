@@ -76,6 +76,7 @@ def official_format_to_aidbox(data: dict) -> dict:
 def aidbox_response_to_official_format(
     data: dict, file_info: dict, session_id: str, location: str
 ) -> dict:
+    aidbox_issue_codes_to_ignore = ["invalid-target-profile", "non-existent-resource"]
     issues = data.get("issue", [])
     if len(issues) == 1:
         if issues[0].get("diagnostics") == "all ok":
@@ -85,7 +86,11 @@ def aidbox_response_to_official_format(
                 "validationTimes": {},
             }
 
-    issues = [format_issue(issue, location) for issue in issues]
+    issues = [
+        format_issue(issue, location)
+        for issue in issues
+        if get_aidbox_issue_code(issue) not in aidbox_issue_codes_to_ignore
+    ]
 
     return {
         "outcomes": [{"fileInfo": file_info, "issues": issues}],
@@ -96,7 +101,7 @@ def aidbox_response_to_official_format(
 
 def format_issue(aidbox_issue: dict, location: str) -> dict:
     logging.error("Aidbox issue: %s", aidbox_issue)
-    code = aidbox_issue.get("details", {}).get("coding", [])[0].get("code", "")
+    code = get_aidbox_issue_code(aidbox_issue)
     diagnostics = aidbox_issue.get("diagnostics", "")
     expressions = aidbox_issue.get("expression", [])
     message = f"{expressions[0]}: {diagnostics}" if len(expressions) > 0 else diagnostics
@@ -118,3 +123,11 @@ def format_issue(aidbox_issue: dict, location: str) -> dict:
         "ignorableError": False,
         "count": 0,
     }
+
+
+def get_aidbox_issue_code(aidbox_issue: dict) -> str:
+    issue_coding = aidbox_issue.get("details", {}).get("coding", [])
+    if len(issue_coding) == 0:
+        return ""
+
+    return issue_coding[0].get("code", "")
