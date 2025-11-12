@@ -37,10 +37,10 @@ def official_format_to_aidbox(data: dict) -> dict:
     profiles = data.get("cliContext", {}).get("profiles", [])
     files_to_validate = data.get("filesToValidate", [])
     session_id = data.get("sessionId", "")
-    
+
     if not files_to_validate:
         return {"resource": {}, "file_info": {}, "session_id": session_id}
-    
+
     if len(files_to_validate) == 1:
         try:
             resource_data = files_to_validate[0].get("fileContent", {})
@@ -50,26 +50,26 @@ def official_format_to_aidbox(data: dict) -> dict:
                 "resource": {},
                 "file_info": files_to_validate[0],
                 "session_id": session_id,
-                "error": f"Invalid JSON: {e!s}"
+                "error": f"Invalid JSON: {e!s}",
             }
-        
+
         if "meta" not in resource_data:
             resource_data["meta"] = {}
-        
+
         existing_profiles = resource_data["meta"].get("profile", [])
         all_profiles = list(set(existing_profiles + profiles))
         resource_data["meta"]["profile"] = all_profiles
-        
+
         return {
             "resource": resource_data,
             "file_info": files_to_validate[0],
             "session_id": session_id,
         }
-    
+
     return {
         "resource": {},
         "file_info": files_to_validate[0] if files_to_validate else {},
-        "session_id": session_id
+        "session_id": session_id,
     }
 
 
