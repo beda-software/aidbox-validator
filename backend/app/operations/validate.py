@@ -37,26 +37,40 @@ def official_format_to_aidbox(data: dict) -> dict:
     profiles = data.get("cliContext", {}).get("profiles", [])
     files_to_validate = data.get("filesToValidate", [])
     session_id = data.get("sessionId", "")
+    
+    if not files_to_validate:
+        return {"resource": {}, "file_info": {}, "session_id": session_id}
+    
     if len(files_to_validate) == 1:
-        resource_data = files_to_validate[0].get("fileContent", {})
-        resource_data = json.loads(resource_data)
-        resource_data_meta = resource_data.get("meta")
-        if resource_data_meta is not None:
-            resource_data_meta_profile = resource_data_meta.get("profile", [])
-            if resource_data_meta_profile is not None:
-                resource_data["meta"]["profile"] = profiles
-            else:
-                resource_data["meta"] = {"profile": profiles}
-        else:
-            resource_data["meta"] = {"profile": profiles}
-
+        try:
+            resource_data = files_to_validate[0].get("fileContent", {})
+            resource_data = json.loads(resource_data)
+        except (json.JSONDecodeError, TypeError) as e:
+            return {
+                "resource": {},
+                "file_info": files_to_validate[0],
+                "session_id": session_id,
+                "error": f"Invalid JSON: {str(e)}"
+            }
+        
+        if "meta" not in resource_data:
+            resource_data["meta"] = {}
+        
+        existing_profiles = resource_data["meta"].get("profile", [])
+        all_profiles = list(set(existing_profiles + profiles))
+        resource_data["meta"]["profile"] = all_profiles
+        
         return {
             "resource": resource_data,
             "file_info": files_to_validate[0],
             "session_id": session_id,
         }
-
-    return {"resource": {}, "file_info": files_to_validate[0], "session_id": session_id}
+    
+    return {
+        "resource": {},
+        "file_info": files_to_validate[0] if files_to_validate else {},
+        "session_id": session_id
+    }
 
 
 def aidbox_response_to_official_format(
