@@ -50,7 +50,7 @@ def official_format_to_aidbox(data: dict) -> dict:
                 "resource": {},
                 "file_info": files_to_validate[0],
                 "session_id": session_id,
-                "error": f"Invalid JSON: {str(e)}"
+                "error": f"Invalid JSON: {e!s}"
             }
         
         if "meta" not in resource_data:
