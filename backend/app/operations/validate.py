@@ -1,5 +1,6 @@
 import json
 import logging
+import uuid
 
 from aidbox_python_sdk.types import SDKOperation, SDKOperationRequest
 from aiohttp import web
@@ -36,7 +37,7 @@ async def validate_op(_operation: SDKOperation, request: SDKOperationRequest) ->
 def official_format_to_aidbox(data: dict) -> dict:
     profiles = data.get("cliContext", {}).get("profiles", [])
     files_to_validate = data.get("filesToValidate", [])
-    session_id = data.get("sessionId", "")
+    session_id = data.get("sessionId", uuid.uuid4())
 
     if not files_to_validate:
         return {"resource": {}, "file_info": {}, "session_id": session_id}
