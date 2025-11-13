@@ -37,7 +37,8 @@ async def validate_op(_operation: SDKOperation, request: SDKOperationRequest) ->
 def official_format_to_aidbox(data: dict) -> dict:
     profiles = data.get("cliContext", {}).get("profiles", [])
     files_to_validate = data.get("filesToValidate", [])
-    session_id = data.get("sessionId", uuid.uuid4())
+    session_id = data.get("sessionId")
+    session_id = session_id if session_id else str(uuid.uuid4())
 
     if not files_to_validate:
         return {"resource": {}, "file_info": {}, "session_id": session_id}
@@ -57,9 +58,7 @@ def official_format_to_aidbox(data: dict) -> dict:
         if "meta" not in resource_data:
             resource_data["meta"] = {}
 
-        existing_profiles = resource_data["meta"].get("profile", [])
-        all_profiles = list(set(existing_profiles + profiles))
-        resource_data["meta"]["profile"] = all_profiles
+        resource_data["meta"]["profile"] = profiles
 
         return {
             "resource": resource_data,
