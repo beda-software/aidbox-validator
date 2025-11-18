@@ -2,10 +2,10 @@ import json
 import logging
 import uuid
 
-from aidbox_python_sdk.types import SDKOperation, SDKOperationRequest
 import fhirpy_types_r4b as r4b
-from fhirpy import AsyncFHIRClient
+from aidbox_python_sdk.types import SDKOperation, SDKOperationRequest
 from aiohttp import web
+from fhirpy import AsyncFHIRClient
 
 from app import app_keys as ak
 from app.sdk import sdk
