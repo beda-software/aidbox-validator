@@ -138,12 +138,12 @@ def get_aidbox_issue_code(aidbox_issue: dict) -> str:
 
 async def save_request(fhir_client: AsyncFHIRClient, data: str) -> r4b.DocumentReference:
     doc_ref_r = r4b.DocumentReference(
-            status="current",
-            content=[
-                r4b.DocumentReferenceContent(
-                    attachment=r4b.Attachment(contentType="text/plain", data=str(data))
-                )
-            ]
-        )
+        status="current",
+        content=[
+            r4b.DocumentReferenceContent(
+                attachment=r4b.Attachment(contentType="text/plain", data=str(data))
+            )
+        ],
+    )
 
     return await fhir_client.save(doc_ref_r)
