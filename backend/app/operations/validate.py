@@ -3,6 +3,8 @@ import logging
 import uuid
 
 from aidbox_python_sdk.types import SDKOperation, SDKOperationRequest
+import fhirpy_types_r4b as r4b
+from fhirpy import AsyncFHIRClient
 from aiohttp import web
 
 from app import app_keys as ak
@@ -13,6 +15,7 @@ from app.sdk import sdk
 async def validate_op(_operation: SDKOperation, request: SDKOperationRequest) -> web.Response:
     fhir_client = request["app"][ak.fhir_client]
     request_data = request["resource"]
+    await save_request(fhir_client, request_data)
     logging.error("Validation request: %s", request_data)
     formatted_request = official_format_to_aidbox(request_data)
     resource_to_validate = formatted_request["resource"]
@@ -131,3 +134,16 @@ def get_aidbox_issue_code(aidbox_issue: dict) -> str:
         return ""
 
     return issue_coding[0].get("code", "")
+
+
+async def save_request(fhir_client: AsyncFHIRClient, data: str) -> r4b.DocumentReference:
+    doc_ref_r = r4b.DocumentReference(
+            status="current",
+            content=[
+                r4b.DocumentReferenceContent(
+                    attachment=r4b.Attachment(contentType="text/plain", data=str(data))
+                )
+            ]
+        )
+
+    return await fhir_client.save(doc_ref_r)
