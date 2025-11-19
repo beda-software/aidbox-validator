@@ -61,7 +61,7 @@ def official_format_to_aidbox(data: dict) -> dict:
         if "meta" not in resource_data:
             resource_data["meta"] = {}
 
-        resource_data["meta"]["profile"] = profiles
+        resource_data["meta"]["profile"] = [profile.split("|")[0] for profile in profiles]
 
         return {
             "resource": resource_data,
