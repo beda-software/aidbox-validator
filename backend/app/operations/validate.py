@@ -15,7 +15,6 @@ from app.sdk import sdk
 async def validate_op(_operation: SDKOperation, request: SDKOperationRequest) -> web.Response:
     fhir_client = request["app"][ak.fhir_client]
     request_data = request["resource"]
-    await save_request(fhir_client, request_data)
     logging.error("Validation request: %s", request_data)
     formatted_request = official_format_to_aidbox(request_data)
     resource_to_validate = formatted_request["resource"]
