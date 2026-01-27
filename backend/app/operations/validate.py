@@ -25,7 +25,7 @@ async def validate_op(_operation: SDKOperation, request: SDKOperationRequest) ->
     logging.error("Resource to validate: %s", resource_to_validate)
 
     validation_results = await fhir_client.execute(
-        f"{resource_type}/$validate", method="POST", data=resource_to_validate
+        f"fhir/{resource_type}/$validate", method="POST", data=resource_to_validate
     )
     validation_results = aidbox_response_to_official_format(
         validation_results, file_info, session_id, resource_type
