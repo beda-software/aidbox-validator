@@ -11,19 +11,21 @@ from app import app_keys as ak
 from app.sdk import sdk
 from app.version import __version__
 
+
 @sdk.operation(["GET"], ["validator", "version"], public=True)
 async def version_op(_operation: SDKOperation, request: SDKOperationRequest) -> web.Response:
     app = request["app"]
     client = app[ak.client]
     aidbox_config = await client.execute("$config", method="GET")
     validator_version = aidbox_config.get("about", {}).get("version", "Unknown")
-    
+
     return web.json_response(
         {
             "validatorWrapperVersion": __version__,
             "validatorVersion": validator_version,
         }
     )
+
 
 @sdk.operation(["POST"], ["validate"], public=True)
 async def validate_op(_operation: SDKOperation, request: SDKOperationRequest) -> web.Response:
