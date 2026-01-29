@@ -1,5 +1,5 @@
 import json
-import logging
+import os
 import uuid
 
 import fhirpy_types_r4b as r4b
@@ -9,29 +9,42 @@ from fhirpy import AsyncFHIRClient
 
 from app import app_keys as ak
 from app.sdk import sdk
+from app.version import __version__
 
+@sdk.operation(["GET"], ["validator", "version"], public=True)
+async def version_op(_operation: SDKOperation, request: SDKOperationRequest) -> web.Response:
+    app = request["app"]
+    client = app[ak.client]
+    aidbox_config = await client.execute("$config", method="GET")
+    validator_version = aidbox_config.get("about", {}).get("version", "Unknown")
+    
+    return web.json_response(
+        {
+            "validatorWrapperVersion": __version__,
+            "validatorVersion": validator_version,
+        }
+    )
 
 @sdk.operation(["POST"], ["validate"], public=True)
 async def validate_op(_operation: SDKOperation, request: SDKOperationRequest) -> web.Response:
-    fhir_client = request["app"][ak.fhir_client]
+    app = request["app"]
+    fhir_client = app[ak.fhir_client]
     request_data = request["resource"]
-    logging.error("Validation request: %s", request_data)
+    is_debug = os.environ.get("REQUEST_DEBUG", "False") == "True"
+    if is_debug:
+        await save_request(fhir_client, request_data)
     formatted_request = official_format_to_aidbox(request_data)
     resource_to_validate = formatted_request["resource"]
     resource_type = resource_to_validate.get("resourceType", "Patient")
     file_info = formatted_request["file_info"]
     session_id = formatted_request["session_id"]
 
-    logging.error("Resource to validate: %s", resource_to_validate)
-
     validation_results = await fhir_client.execute(
-        f"fhir/{resource_type}/$validate", method="POST", data=resource_to_validate
+        f"{resource_type}/$validate", method="POST", data=resource_to_validate
     )
     validation_results = aidbox_response_to_official_format(
         validation_results, file_info, session_id, resource_type
     )
-
-    logging.error("Validation results: %s", validation_results)
 
     return web.json_response(validation_results)
 
@@ -102,7 +115,6 @@ def aidbox_response_to_official_format(
 
 
 def format_issue(aidbox_issue: dict, location: str) -> dict:
-    logging.error("Aidbox issue: %s", aidbox_issue)
     code = get_aidbox_issue_code(aidbox_issue)
     diagnostics = aidbox_issue.get("diagnostics", "")
     expressions = aidbox_issue.get("expression", [])

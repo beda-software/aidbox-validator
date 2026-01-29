@@ -23,7 +23,7 @@ services:
     volumes:
       - ./backend:/backend
   devbox:
-    image: healthsamurai/aidboxone:edge
+    image: healthsamurai/aidboxone:2512.2
     depends_on:
       devbox-db:
         condition: service_healthy
